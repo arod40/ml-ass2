@@ -37,13 +37,15 @@ w_prev = None
 
 w = [random() * (u - l) + l for u, l in zip(upper, lower)]
 gradient = [0] * d
-v = 0
+v = [0] * d
 
 norm, norm_inv = normalization_functions(lower, upper)
 elem_wise = lambda vec1, vec2, op: [op(x, y) for x, y in zip(vec1, vec2)]
 scalar_mult = lambda scalar, vector: [scalar * x for x in vector]
+add = lambda x, y: x + y
 mult = lambda x, y: x * y
 sub = lambda x, y: x - y
+div = lambda x, y: x / y
 
 it = 0
 while it < MAX_QUERIES:  # and (datetime.now() - time_start).seconds < 1.9:
@@ -66,11 +68,16 @@ while it < MAX_QUERIES:  # and (datetime.now() - time_start).seconds < 1.9:
         w = w_prev
 
     # Updating lr and w
-    v = beta * v + (1 - beta) * sum(elem_wise(w, w, mult))
+    v = [
+        sqrt(x) + eps
+        for x in elem_wise(
+            scalar_mult(beta, v), scalar_mult(1 - beta, elem_wise(w, w, mult)), add
+        )
+    ]
     checked = False
     # Adjusting learning rate if stepped out of the bounds
     for i in range(10):
-        w = elem_wise(w, scalar_mult(lr / (sqrt(v) + eps), gradient), sub)
+        w = elem_wise(w, scalar_mult(lr, elem_wise(gradient, v, div)), sub)
         if check_bounds(w, lower, upper):
             checked = True
             break
@@ -82,6 +89,7 @@ while it < MAX_QUERIES:  # and (datetime.now() - time_start).seconds < 1.9:
         f_prev = inf
         w_prev = None
         lr = 0.1
+        v = [0] * d
     else:
         f_prev = f
         w_prev = w
