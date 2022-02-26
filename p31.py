@@ -1,7 +1,11 @@
 from itertools import product
-from random import choice, random
+from random import choice, random, seed
+import numpy as np
 
 import matplotlib.pyplot as plt
+
+
+seed(0)
 
 
 def check_half_circle(circle, upper=True):
@@ -78,6 +82,13 @@ def perceptron(data, max_iter=-1, first_or_choice=True):
     return w, it, len([(x, y) for x, y in data if perceptron(w, x) != y])
 
 
+def linear_regression_matrix(data):
+    X = np.array([[1] + x for x, _ in data])
+    y = np.array([y for _, y in data])
+    Xt = X.transpose()
+    return list(np.matmul(np.matmul(np.linalg.inv(np.matmul(Xt, X)), Xt), y))
+
+
 rad = 10
 thk = 5
 sep = 5
@@ -94,12 +105,34 @@ circles = [
 
 data = generate_points(2000, circles, (box_width, box_height))
 
-w, it, wrong = perceptron(data, first_or_choice=False)
 
 fig, ax = plt.subplots()
 plot_data(data, ax)
-plot_line(w, 0, box_width, ax, label="f")
+
+import sys
 
 
+def linear(w, x):
+    w, bias = w[1:], w[0]
+    return sum([wi * xi for wi, xi in zip(w, x)]) + bias
+
+
+def mse(weights):
+    return sum([(linear(weights, x) - y) ** 2 for x, y in data]) / len(data)
+
+
+item = sys.argv[1]
+if item == "a":
+    w1, it, wrong = perceptron(data, first_or_choice=False)
+    plot_line(w1, 0, box_width, ax, label="perceptron", color="black")
+    print(mse(w1))
+
+
+elif item == "b":
+    w2 = linear_regression_matrix(data)
+    plot_line(w2, 0, box_width, ax, label="linear regression", color="black")
+    print(mse(w2))
+
+ax.legend()
 plt.show()
 

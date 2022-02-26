@@ -71,7 +71,9 @@ while it < MAX_QUERIES:  # and (datetime.now() - time_start).seconds < 1.9:
     v = [
         sqrt(x) + eps
         for x in elem_wise(
-            scalar_mult(beta, v), scalar_mult(1 - beta, elem_wise(w, w, mult)), add
+            scalar_mult(beta, v),
+            scalar_mult(1 - beta, elem_wise(gradient, gradient, mult)),
+            add,
         )
     ]
     checked = False
