@@ -14,13 +14,6 @@ def check_bounds(w, lower=None, upper=None):
     )
 
 
-def normalization_functions(lows, ups):
-    halfs = [(up - low) / 2 for up, low in zip(lows, ups)]
-    norm = lambda w: [(x - low - half) / half for x, low, half in zip(w, halfs, lows)]
-    norm_inv = lambda w: [x * half + half + low for x, low, half in zip(w, halfs, lows)]
-    return norm, norm_inv
-
-
 MAX_QUERIES = 10000
 LOW = -1000
 UP = 1000
@@ -39,7 +32,6 @@ w = [random() * (u - l) + l for u, l in zip(upper, lower)]
 gradient = [0] * d
 v = [0] * d
 
-norm, norm_inv = normalization_functions(lower, upper)
 elem_wise = lambda vec1, vec2, op: [op(x, y) for x, y in zip(vec1, vec2)]
 scalar_mult = lambda scalar, vector: [scalar * x for x in vector]
 add = lambda x, y: x + y
@@ -51,23 +43,17 @@ it = 0
 while it < MAX_QUERIES:  # and (datetime.now() - time_start).seconds < 1.9:
     it += 1
 
-    # Unnormalizing
-    # w = norm_inv(w)
-
     # Querying the grader
     print(" ".join([str(wi) for wi in w]))
     f = float(input())
     gradient = list(map(float, input().split()))
-
-    # Normalizing
-    # w = norm(w)
 
     # Shrink lr if overstepped
     if f > f_prev and it > 10:
         lr /= 10
         w = w_prev
 
-    # Updating lr and w
+    # Updating v
     v = [
         sqrt(x) + eps
         for x in elem_wise(

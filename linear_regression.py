@@ -86,14 +86,7 @@ def gradient_descent(target, derivative, bounds, max_steps=10000, max_time=2):
     return best_w, best_f, it, lr
 
 
-def normalize_data(data):
-    norm_data = data
-    weight_norm_inv = lambda x: x
-    return norm_data, weight_norm_inv
-
-
 def linear_regression(data):
-    data, weight_norm_inv = normalize_data(data)
 
     N = len(data)
     d = len(data[0][0])
@@ -121,8 +114,6 @@ def linear_regression(data):
         max_steps=100000,
         max_time=2,
     )
-
-    w = weight_norm_inv(w)
 
     return w
 
